@@ -1,6 +1,6 @@
 # Zorvyn Finance Dashboard
 
-🚀 **Live Demo:** [https://zorvyn-assignment-finance-dashboard.vercel.app/](https://zorvyn-assignment-finance-dashboard.vercel.app/)
+🚀 **Live Demo:** [View Zorvyn Dashboard](https://zorvyn-assignment-finance-dashboard.vercel.app/)
 
 ![Zorvyn Dashboard Screenshot](https://api.microlink.io/?url=https://zorvyn-assignment-finance-dashboard.vercel.app/&screenshot=true&embed=screenshot.url)
 
