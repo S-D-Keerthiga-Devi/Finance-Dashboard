@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
-import { Search, Filter, Plus, Pencil, Trash2, ArrowUpDown, Receipt } from 'lucide-react';
+import { Search, Filter, Plus, Pencil, Trash2, ArrowUpDown, Receipt, ChevronDown, Check } from 'lucide-react';
 import { formatCurrency } from '../../utils/format';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
@@ -14,6 +14,19 @@ export default function TransactionsList() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [sortField, setSortField] = useState<'date' | 'amount'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const filterMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
+        setIsFilterMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -92,17 +105,44 @@ export default function TransactionsList() {
             />
           </div>
           
-          <div className="relative">
-             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-             <select
-               value={typeFilter}
-               onChange={(e) => setTypeFilter(e.target.value as any)}
-               className="pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none min-w-[140px]"
-             >
-                <option value="all">All Types</option>
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-             </select>
+          <div className="relative" ref={filterMenuRef}>
+            <button
+              onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+              className="flex items-center justify-between w-[140px] pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-left"
+            >
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <span className="truncate">
+                {typeFilter === 'all' ? 'All Types' : typeFilter === 'income' ? 'Income' : 'Expense'}
+              </span>
+              <ChevronDown className="w-4 h-4 text-slate-400 ml-1 shrink-0" />
+            </button>
+
+            {isFilterMenuOpen && (
+              <div className="absolute left-0 mt-2 w-[140px] bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-1.5 z-50 transform origin-top-left transition-all">
+                {[
+                  { value: 'all', label: 'All Types' },
+                  { value: 'income', label: 'Income' },
+                  { value: 'expense', label: 'Expense' }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors ${
+                      typeFilter === option.value
+                        ? 'text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50/50 dark:bg-indigo-900/20'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                    }`}
+                    onClick={() => {
+                      setTypeFilter(option.value as any);
+                      setIsFilterMenuOpen(false);
+                    }}
+                  >
+                    <span>{option.label}</span>
+                    {typeFilter === option.value && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
